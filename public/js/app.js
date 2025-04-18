@@ -122,7 +122,7 @@ async function saveSettings() {
             }
             
             // Hide settings panel
-            settingsPanel.classList.add('hidden');
+            settingsPanel.classList.remove('active');
         }
     } catch (error) {
         console.error('Error saving settings:', error);
@@ -381,12 +381,20 @@ function updateExamList(exams) {
     });
 }
 
-function toggleExamCompletion(examId) {
-    const exam = exams.find(e => e.id === examId);
-    if (exam) {
-        exam.completed = !exam.completed;
-        updateExamList(exams);
-        saveExams();
+async function toggleExamCompletion(examId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/exams/${examId}/toggle`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            await loadExams(); // Reload the exam list to get the updated state
+        }
+    } catch (error) {
+        console.error('Error toggling exam completion:', error);
     }
 }
 
@@ -406,7 +414,7 @@ async function deleteExam(examId) {
 
 // Settings Management
 function toggleSettings() {
-    settingsPanel.classList.toggle('hidden');
+    settingsPanel.classList.toggle('active');
 }
 
 // Theme Management
